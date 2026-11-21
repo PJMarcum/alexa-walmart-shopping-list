@@ -44,7 +44,7 @@ walmart_add_to_list:
 
 # SMS indirection for the AppDaemon app.
 #
-# The app cannot call an SMS notify service directly. AppDaemon reserves the kwarg
+# The app cannot call notify.twilio_sms directly. AppDaemon reserves the kwarg
 # 'target' and hoists it out of service_data into the websocket envelope,
 # where Home Assistant expects a mapping of entity_id/device_id/area_id. A
 # legacy notify platform wants 'target' INSIDE service_data as an ordinary
@@ -69,8 +69,9 @@ walmart_send_sms:
   sequence:
     - condition: template
       value_template: "{{ (recipients | default([])) | count > 0 }}"
-    # Replace with your own SMS notify service.
-    - action: notify.your_sms_service
+    # notify.twilio_sms comes from ha/twilio_notify.yaml. Any SMS notify
+    # platform that takes phone numbers as 'target' works here too.
+    - action: notify.twilio_sms
       data:
         message: "{{ message }}"
         target: "{{ recipients }}"

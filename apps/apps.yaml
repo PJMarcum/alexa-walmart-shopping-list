@@ -16,11 +16,11 @@ walmart_cart:
   announce_targets:
     - notify.kitchen_echo_announce
     - notify.den_echo_announce
-  # Optional SMS. Its own channel, not a notify_target, because an SMS
-  # notify platform takes recipients as 'target' at call time and needs the
-  # cart URL inside the message body. Goes through script.walmart_send_sms
-  # (ha/scripts.yaml), which you point at your own SMS notify service.
-  # Leave sms_recipients empty to disable.
+  # Optional SMS through Twilio (see docs/configuration.md). Its own
+  # channel, not a notify_target, because Twilio's notify platform takes
+  # recipients as 'target' at call time and needs the cart URL inside the
+  # message body. It goes through script.walmart_send_sms (ha/scripts.yaml),
+  # which calls notify.twilio_sms. Leave sms_recipients empty to disable.
   sms_service: script/walmart_send_sms
   sms_recipients: []
     # - "+15555550100"

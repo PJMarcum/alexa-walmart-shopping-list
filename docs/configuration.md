@@ -11,7 +11,7 @@ Most settings are in `apps/apps.yaml`. A few are constants near the top of
 | `serpapi_key` | Read from `secrets.yaml`. Leave it out and new phrases just wait for a manual pick, with no search. |
 | `notify_targets` | The phones that get the cart link, as `notify/mobile_app_<name>`. Each one is tried separately, so a phone that's off doesn't stop the others. |
 | `announce_targets` | Echo `notify` entities that announce "your cart is ready". Leave the list empty to turn announcements off. |
-| `sms_service`, `sms_recipients` | Optional SMS. Empty recipients means off. See below. |
+| `sms_service`, `sms_recipients` | Optional texts through Twilio. Empty recipients means off. See [Texts through Twilio](#texts-through-twilio). |
 | `reload_anchor_entity` | Any `todo` entity from the Alexa Devices integration. The app uses it to make the integration refresh the list before a build. |
 | `catalog_path`, `run_dir` | Where the catalog and the build logs live. |
 | `ui_data_path` | Where the app writes the panel's copy of the catalog. Leave it alone unless you've moved `/config/www`. |
@@ -38,43 +38,109 @@ The scheduled run announces on the Echoes. If yours runs while people are
 asleep, point it at `script.build_walmart_cart_quiet` instead. That one
 builds and notifies the phones without speaking.
 
-## Tablet buttons (Fully Kiosk)
+## The hulu and chatgpt buttons
 
-The top bar has **hulu**, **chatgpt** and a timer button that start apps on
-the tablet. They need the Fully Kiosk Browser integration.
+The top bar of the panel has two app buttons, **hulu** and **chatgpt**, and
+a timer button. Tap one and the app opens on the kitchen tablet, on top of
+Fully Kiosk.
 
-- Set `TABLET_DEVICE` in `panel.js` to the tablet's device ID. Open the
-  device under **Settings > Devices**; the ID is the last part of the page
-  URL.
-- `HULU_PACKAGE` and `CHATGPT_PACKAGE` are Android package names. Swap them
-  for any apps you'd rather have, and change the button labels in `panel.js`
-  to match.
-- The timer button calls a script named `kitchen_tablet_timer`, which isn't
-  included. Fully's integration can't fire an Android intent, so ours calls
-  Fully's REST API with a `rest_command` to open the clock app's timer tab.
-  Without that script the button does nothing (it logs a warning).
+They need the **Fully Kiosk Browser** integration in Home Assistant, and the
+tablet needs both apps installed.
 
-If you don't use Fully Kiosk, the buttons fail quietly and everything else
-works.
+1. Find the tablet's device ID. Open it under **Settings > Devices**; the ID
+   is the last part of the page URL.
+2. Set `TABLET_DEVICE` near the top of `ha/www/kitchen/panel.js` to that ID.
+3. Deploy the panel again (a new version folder, see [install](install.md)).
 
-## SMS
+Each button calls `fully_kiosk.start_application` with an Android package
+name, `com.hulu.plus` and `com.openai.chatgpt`. To launch different apps,
+change `HULU_PACKAGE` and `CHATGPT_PACKAGE` in `panel.js` and the button
+labels in the panel's top-bar markup. You can find any app's package name in
+its Google Play link, after `id=`.
 
-SMS is off by default. To turn it on:
+The buttons start the app by package name instead of opening a web link on
+purpose. A link to hulu.com opened in Chrome, not the Hulu app, because
+Android only hands a link to an app when the app claims that exact path, and
+nothing claims the bare homepage.
 
-1. Set up any Home Assistant notify platform that sends texts and takes the
-   phone numbers as `target`.
-2. Change the action in `script.walmart_send_sms` (`ha/scripts.yaml`) to that
-   notify service.
-3. Put the numbers in `sms_recipients` in `apps.yaml`, in `+15555550100`
-   format.
+The buttons always act on the tablet, even when you press them from another
+device. On the kitchen tablet that's what you want. From your desk it starts
+Hulu in the kitchen.
 
-The app goes through the script instead of calling the notify service
-directly because AppDaemon treats the word `target` specially and mangles
-it. The script takes `recipients` and passes them on as `target`.
+### The timer button
 
-US carriers filter or block texts sent by software unless the sender is
-registered (A2P 10DLC or a verified toll-free number). Check what your SMS
-provider requires before you count on it.
+The timer button calls a script named `kitchen_tablet_timer`, which isn't
+included because it needs your tablet's Fully Kiosk password. Fully's Home
+Assistant integration can only start an app, not open a specific screen in
+it, and starting the clock app lands on the big desk clock instead of the
+timer. Ours uses a `rest_command` to call Fully's own REST API on the tablet
+and open the clock app's timer screen with the
+`android.intent.action.SHOW_TIMERS` intent. Without the script the button
+does nothing and logs a warning.
+
+If you don't use Fully Kiosk at all, all three buttons fail quietly and
+everything else works.
+
+## Texts through Twilio
+
+The cart link always goes to the phones in `notify_targets` through the
+Home Assistant app. Texting it as well is optional.
+
+### Before you start: registration
+
+US carriers filter or block texts sent by software unless the sending
+number is registered. With Twilio that means an **A2P 10DLC** brand and
+campaign registration for a normal number, or **toll-free verification**
+for a toll-free number. Approval takes days, so start it first.
+
+Read Twilio's current rules before you apply. When we set this up, Twilio
+didn't accept personal-use programs (texts only to yourself, family or
+friends) for either 10DLC or toll-free verification, so a purely household
+use may not qualify on its own.
+
+### Setup
+
+1. Create a Twilio account, buy a number, and finish registration.
+2. Add your credentials to Home Assistant's `secrets.yaml`:
+
+   ```yaml
+   twilio_account_sid: ACxxxxxxxxxxxxxxxx
+   twilio_auth_token: xxxxxxxxxxxxxxxx
+   twilio_from_number: "+15555550100"
+   ```
+
+3. Add the `twilio:` block from `ha/twilio.yaml` and the `notify:` entry from
+   `ha/twilio_notify.yaml` to `configuration.yaml`, then restart Home
+   Assistant. `notify.twilio_sms` doesn't exist until that restart.
+4. Make sure `script.walmart_send_sms` from `ha/scripts.yaml` is in your
+   scripts. It already calls `notify.twilio_sms`.
+5. Put the phone numbers in `sms_recipients` in `apps.yaml`, in
+   `+15555550100` format, and restart the AppDaemon add-on. Start with just
+   your own number until you've seen it work.
+
+### Check it
+
+1. In **Developer Tools > Actions**, call `notify.twilio_sms` with a
+   `message` and your number as the `target`. The text should arrive within
+   seconds. If it doesn't, check the message log in the Twilio console. It
+   names the reason (unregistered number, bad credentials and so on).
+2. Run `script.build_walmart_cart` and check that the text has the cart link
+   and that tapping it opens the cart.
+
+### Good to know
+
+- **Long carts mean longer texts.** A big cart link runs to several hundred
+  characters, so one text can be billed as three or four segments. It still
+  costs pennies, and the link is the whole point, so it isn't shortened.
+- **Why the script is there.** The app sends texts through
+  `script.walmart_send_sms` instead of calling `notify.twilio_sms` itself,
+  because AppDaemon treats the word `target` specially and mangles it. The
+  script takes `recipients` and passes them on as `target`.
+- **Texting is its own channel.** If Twilio is down or misconfigured, the
+  app logs a warning, and the phone notification and Echo announcement
+  still go out.
+- **Other providers.** Any Home Assistant notify platform that takes phone
+  numbers as `target` works. Point `script.walmart_send_sms` at it.
 
 ## Mealie pages
 

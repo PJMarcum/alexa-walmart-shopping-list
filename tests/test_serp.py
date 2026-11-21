@@ -113,3 +113,19 @@ def test_a_search_result_keeps_its_picture():
     assert out[0].thumbnail == "https://i5.walmartimages.com/seo/chops.jpeg"
     # A result without one must not blow up; the sheet falls back to a glyph.
     assert out[1].thumbnail is None
+
+
+def test_a_failed_request_never_puts_the_key_in_the_error():
+    # requests' HTTPError text ends "for url: <full url>", key included, and
+    # the app logs the error message.
+    def fetch(url):
+        raise RuntimeError(f"401 Client Error: Unauthorized for url: {url}")
+
+    try:
+        search("milk", "SUPERSECRETKEY", fetch=fetch)
+    except SerpError as exc:
+        assert "SUPERSECRETKEY" not in str(exc)
+        assert "api_key=***" in str(exc)
+        assert exc.__cause__ is None
+    else:
+        raise AssertionError("expected SerpError")

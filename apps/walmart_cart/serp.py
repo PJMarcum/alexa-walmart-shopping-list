@@ -6,6 +6,7 @@ be clever about budget: it fails loudly and the caller leaves the phrase on
 the Alexa list for next week.
 """
 
+import re
 import urllib.parse
 
 from .scoring import Candidate
@@ -26,13 +27,24 @@ def _default_fetch(url: str) -> dict:
     return response.json()
 
 
+_KEY = re.compile(r"(api_key=)[^&\s'\"]+")
+
+
+def _mask(text: str) -> str:
+    return _KEY.sub(r"\1***", text)
+
+
 def _get(url: str, fetch) -> dict:
     try:
         payload = (fetch or _default_fetch)(url)
     except SerpError:
         raise
     except Exception as exc:
-        raise SerpError(f"SerpAPI request failed: {exc}") from exc
+        # requests puts the full URL in its error text ("... for url: ..."),
+        # and the URL carries api_key. The caller logs this message, so the
+        # key would land in the AppDaemon log. Mask it, and drop the chained
+        # exception, which holds the same URL.
+        raise SerpError(f"SerpAPI request failed: {_mask(str(exc))}") from None
     if isinstance(payload, dict) and payload.get("error"):
         raise SerpError(str(payload["error"]))
     return payload

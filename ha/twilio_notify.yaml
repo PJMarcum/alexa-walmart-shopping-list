@@ -1,0 +1,9 @@
+# --- goes under 'notify:' in configuration.yaml ---
+#
+# twilio_sms takes recipients as 'target' at call time rather than here, has
+# no 'title', and needs the URL inside the message body because an SMS has no
+# tap action. That is why the AppDaemon app treats SMS as its own channel
+# rather than as another entry in notify_targets.
+- name: twilio_sms
+  platform: twilio_sms
+  from_number: !secret twilio_from_number

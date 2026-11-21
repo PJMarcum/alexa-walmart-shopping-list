@@ -65,9 +65,9 @@ All of these go in `/homeassistant` (also called `/config`).
 - **Panel.** Paste the `panel_custom:` block from `ha/panel_custom.yaml`
   into `configuration.yaml`.
 
-If you use the SMS option, also edit `script.walmart_send_sms` so it calls
-your own SMS notify service. Otherwise leave `sms_recipients` empty in
-`apps.yaml` and SMS stays off.
+Texting the cart link through Twilio is optional and has its own setup. See
+[Texts through Twilio](configuration.md#texts-through-twilio). Until then,
+leave `sms_recipients` empty in `apps.yaml` and texting stays off.
 
 ## 5. Copy the panel files
 
@@ -121,4 +121,5 @@ We run the panel on an Android tablet in Fully Kiosk Browser, signed in as
 its own non-admin Home Assistant user. Add `?kiosk` to the start URL
 (`/kitchen?kiosk`) and the panel hides Home Assistant's sidebar for that user
 only. The **hulu**, **chatgpt** and timer buttons need the Fully Kiosk
-integration and some setup; see [configuration](configuration.md).
+integration and some setup; see
+[the hulu and chatgpt buttons](configuration.md#the-hulu-and-chatgpt-buttons).

@@ -21,13 +21,14 @@ off what's already in the pantry before we order.
 - Never guesses on a new phrase. It shows the top matches on the tablet and
   waits for someone to tap the right one. After that, the phrase just works.
 - Builds a Walmart cart link, pushes it to your phones (and optionally
-  announces on your Echoes), and removes only the items that made it into
-  the cart. Anything still waiting for a match stays on the list.
+  texts it through Twilio and announces it on your Echoes), and removes only
+  the items that made it into the cart. Anything still waiting for a match stays on the list.
 - Runs on a schedule, from the panel's **Build cart** button, or by voice.
 
 The panel itself has five pages: **Walmart** (the list and review),
 **What We Buy** (a tap-to-add grid of your usual products), **Recipes**,
-**Weekly Menu** and **Ingredients**.
+**Weekly Menu** and **Ingredients**. Buttons in the top bar open Hulu,
+ChatGPT and a cooking timer on the tablet.
 
 ## What you need
 
@@ -40,6 +41,7 @@ The panel itself has five pages: **Walmart** (the list and review),
 - Optional: **Mealie** and its Home Assistant integration for the recipe and
   menu pages, and **Fully Kiosk Browser** on the tablet for the app buttons
   and screensaver.
+- Optional: a **Twilio** account if you want the cart link texted too.
 
 ## Getting started
 
@@ -77,7 +79,8 @@ Run the tests with `python -m pytest` and `node --test tests/js/*.test.js`.
 ## Not affiliated with anyone
 
 This is a personal project. It isn't affiliated with or endorsed by Walmart,
-Amazon, SerpAPI or Mealie. All of their names belong to them.
+Amazon, SerpAPI, Mealie, Twilio, Hulu or OpenAI. All of their names belong
+to them.
 
 ## License
 

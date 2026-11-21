@@ -1,0 +1,19 @@
+# Twilio SMS for Home Assistant.
+#
+# Include from configuration.yaml:
+#   twilio: !include twilio.yaml          <- the 'twilio:' block below
+#   notify: !include twilio_notify.yaml   <- the 'notify:' list below
+# or paste both blocks directly into configuration.yaml.
+#
+# Credentials go in secrets.yaml, never in this repo.
+#   twilio_account_sid: ACxxxxxxxx
+#   twilio_auth_token: xxxxxxxx
+#   twilio_from_number: "+15555550100"
+#
+# The from_number must be a Twilio number on an APPROVED 10DLC campaign (or
+# a verified toll-free number). Unregistered US traffic is filtered or
+# blocked outright, and carriers add a surcharge for it.
+
+# --- goes under 'twilio:' in configuration.yaml ---
+account_sid: !secret twilio_account_sid
+auth_token: !secret twilio_auth_token
