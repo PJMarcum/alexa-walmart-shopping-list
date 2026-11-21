@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "store_id": "1234",
+  "index": {
+    "80000001": {
+      "item_id": "80000001",
+      "display_name": "Value Pantry, 2% Reduced Fat Milk, Gallon",
+      "category": "Dairy & Eggs",
+      "bought_count": "4"
+    },
+    "80000003": {
+      "item_id": "80000003",
+      "display_name": "Hearthside Giant White Bread, Sliced Sandwich Bread Loaf, 24 oz",
+      "category": "Bakery & Bread",
+      "bought_count": "5"
+    },
+    "800000012": {
+      "item_id": "800000012",
+      "display_name": "Bread Basket Ready-to-Heat Broccoli Cheddar Soup, 16 oz",
+      "category": "Pantry",
+      "bought_count": "5+"
+    },
+    "80000002": {
+      "item_id": "80000002",
+      "display_name": "Diet Dr Fizz Soda Pop, 12 fl oz, 12 Pack Cans",
+      "category": "Beverages",
+      "bought_count": "5+"
+    }
+  },
+  "aliases": {},
+  "pending": [],
+  "skip_phrases": []
+}

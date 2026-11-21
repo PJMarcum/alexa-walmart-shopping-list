@@ -1,0 +1,265 @@
+# ha/scripts.yaml
+#
+# These are only this project's scripts. If you already have a scripts.yaml,
+# ADD these to it. Do not copy this file over yours, or every script you
+# already have is gone.
+#
+# Check afterwards with Developer Tools > YAML > Check configuration, then
+# reload scripts.
+
+build_walmart_cart:
+  alias: Build Walmart Cart
+  icon: mdi:cart-arrow-down
+  sequence:
+    - event: walmart_build_cart
+      event_data:
+        dry_run: false
+
+build_walmart_cart_dry_run:
+  alias: Build Walmart Cart (dry run)
+  icon: mdi:cart-outline
+  sequence:
+    - event: walmart_build_cart
+      event_data:
+        dry_run: true
+
+
+# Called by the catalog card when a tile is tapped. Writes the product's full
+# display_name to the Alexa list, which exact-matches the catalog index on the
+# next build, so a tapped item needs no resolution and still appears in
+# everyone's Alexa app the way a spoken item does.
+walmart_add_to_list:
+  alias: Walmart add to list
+  fields:
+    item:
+      description: The product name to add to the Alexa Walmart list
+      example: Value Pantry, 2% Reduced Fat Milk, Gallon
+  sequence:
+    - action: todo.add_item
+      target:
+        entity_id: todo.you_example_com_walmart
+      data:
+        item: "{{ item }}"
+
+
+# SMS indirection for the AppDaemon app.
+#
+# The app cannot call an SMS notify service directly. AppDaemon reserves the kwarg
+# 'target' and hoists it out of service_data into the websocket envelope,
+# where Home Assistant expects a mapping of entity_id/device_id/area_id. A
+# legacy notify platform wants 'target' INSIDE service_data as an ordinary
+# parameter. The two meanings collide and HA rejects the call with
+# "invalid_format: expected a mapping at 'target'. Got ['+1...']" after the
+# message has been composed perfectly.
+#
+# So the app passes 'recipients', a name AppDaemon has no opinion about, and
+# this script puts it back where the notify platform expects it.
+walmart_send_sms:
+  alias: Walmart send SMS
+  icon: mdi:message-text-outline
+  mode: queued
+  max: 10
+  fields:
+    message:
+      description: The SMS body, which already contains the cart URL
+      example: "Walmart cart ready, 4 items: https://affil.walmart.com/..."
+    recipients:
+      description: List of E.164 numbers
+      example: '["+15555551234"]'
+  sequence:
+    - condition: template
+      value_template: "{{ (recipients | default([])) | count > 0 }}"
+    # Replace with your own SMS notify service.
+    - action: notify.your_sms_service
+      data:
+        message: "{{ message }}"
+        target: "{{ recipients }}"
+
+# The scheduled Friday build. Identical to build_walmart_cart except that it
+# tells the app not to speak.
+#
+# A separate script rather than a templated field on the existing one: Jinja
+# renders a boolean to the STRING "False", and a non-empty string is truthy in
+# Python, so a templated announce would have silently announced anyway. Static
+# event data cannot have that problem. Same reasoning as the tap-to-pick
+# buttons passing a static number.
+#
+# The cart is still built and the phones are still notified; only the Echoes
+# stay quiet, because 07:00 Friday is before the house is awake and the living
+# room and office Echoes have no Do Not Disturb set.
+build_walmart_cart_quiet:
+  alias: Build Walmart Cart (no announcement)
+  icon: mdi:cart-arrow-down
+  sequence:
+    - event: walmart_build_cart
+      event_data:
+        dry_run: false
+        announce: false
+
+# ---------------------------------------------------------------------------
+# The kitchen panel fires its events through these three scripts.
+#
+# Home Assistant guards POST /api/events/{event_type} with @require_admin
+# (components/api/__init__.py, class APIEventView). The kitchen tablet signs
+# in as its own non-admin account, so calling that endpoint
+# from the panel returned 401 and every pick, skip and Build cart failed with
+# "That did not save. Please try again."
+#
+# Calling a script is an ordinary service call, which a non-admin may make,
+# and the script fires the event with Home Assistant's own authority. The
+# alternative, making the wall tablet an admin, is the wrong trade.
+#
+# These take their data from the CALL, unlike walmart_pick_nth above, which
+# exists only because a Lovelace button cannot pass a templated value.
+# ---------------------------------------------------------------------------
+walmart_panel_pick:
+  alias: Walmart panel pick candidate
+  icon: mdi:cursor-default-click
+  # queued, not single: tapping through several unmatched items in a row is
+  # the normal way to clear a Friday list, and single would drop the rest.
+  mode: queued
+  max: 10
+  fields:
+    phrase:
+      description: The phrase exactly as it appears on the list
+      example: Pork chops
+      required: true
+    item_id:
+      description: Walmart item id to map that phrase to
+      example: "80000005"
+      required: true
+  sequence:
+    # Both must be present. Firing with an empty item_id writes an alias that
+    # resolves to nothing, forever, and looks like a match on the list.
+    - condition: template
+      value_template: >-
+        {{ phrase | default('') | trim != '' and
+           item_id | default('') | string | trim != '' }}
+    - event: walmart_pick_candidate
+      event_data:
+        phrase: "{{ phrase }}"
+        item_id: "{{ item_id | string }}"
+
+walmart_panel_skip:
+  alias: Walmart panel skip phrase
+  icon: mdi:cancel
+  mode: queued
+  max: 10
+  fields:
+    phrase:
+      description: The phrase to stop asking about
+      example: Happy birthday
+      required: true
+  sequence:
+    - condition: template
+      value_template: "{{ phrase | default('') | trim != '' }}"
+    - event: walmart_skip_phrase
+      event_data:
+        phrase: "{{ phrase }}"
+
+walmart_panel_build:
+  alias: Walmart panel build cart
+  icon: mdi:cart-arrow-down
+  mode: single
+  sequence:
+    # Literal booleans, never templates. A template renders to the STRING
+    # "False", and the app does bool(data.get("dry_run")), which is True for
+    # any non-empty string. That would turn a real build into a dry run and
+    # silently cart nothing.
+    - event: walmart_build_cart
+      event_data:
+        dry_run: false
+        announce: true
+
+# ---------------------------------------------------------------------------
+# Parse the ingredients of every recipe on this week's plan.
+#
+# Same path as the panel's other actions: the panel cannot hold a Mealie API
+# token, because /config/www is served to anyone on the network without
+# authentication. It calls this script, the script fires an event, and the
+# AppDaemon app does the work with the token from its own secrets.yaml.
+# ---------------------------------------------------------------------------
+mealie_parse_week:
+  alias: Mealie parse this week's ingredients
+  icon: mdi:format-list-checks
+  mode: single
+  fields:
+    slugs:
+      description: Comma separated recipe slugs to parse
+      example: homemade-chili,corn-ribs
+      required: true
+  sequence:
+    - condition: template
+      value_template: "{{ slugs | default('') | trim != '' }}"
+    - event: mealie_parse_week
+      event_data:
+        slugs: "{{ slugs }}"
+
+# ---------------------------------------------------------------------------
+# Ticking an ingredient off the week's list. Same path as the panel's other
+# actions: a script the panel may call, firing an event AppDaemon listens for.
+# ---------------------------------------------------------------------------
+kitchen_ingredient_toggle:
+  alias: Kitchen tick an ingredient
+  icon: mdi:checkbox-marked-outline
+  mode: queued
+  max: 25
+  fields:
+    key:
+      description: The ingredient's stable key
+      example: food:onion
+      required: true
+    week:
+      description: Monday of the week the tick belongs to
+      example: "2026-09-28"
+      required: true
+  sequence:
+    - condition: template
+      value_template: >-
+        {{ key | default('') | trim != '' and week | default('') | trim != '' }}
+    - event: kitchen_ingredient_toggle
+      event_data:
+        key: "{{ key }}"
+        week: "{{ week }}"
+
+# Check all or uncheck all on the ingredients list. The panel sends the keys
+# it wants ticked, newline separated, rather than a command: "check all"
+# cannot then tick something the panel does not have on screen.
+kitchen_ingredients_set:
+  alias: Kitchen set all ingredient ticks
+  icon: mdi:checkbox-multiple-marked-outline
+  mode: single
+  fields:
+    week:
+      description: Saturday of the week the ticks belong to
+      example: "2026-10-03"
+      required: true
+    keys:
+      description: Newline separated ingredient keys to tick, empty to clear
+      example: "food:onion\nfood:egg"
+      required: false
+  sequence:
+    - condition: template
+      value_template: "{{ week | default('') | trim != '' }}"
+    - event: kitchen_ingredients_set
+      event_data:
+        week: "{{ week }}"
+        keys: "{{ keys | default('') }}"
+
+# Look one phrase up at Walmart on demand. SerpAPI otherwise only runs during
+# a build, so a phrase added afterwards has nothing but local guesses.
+walmart_search_phrase:
+  alias: Walmart search for a phrase
+  icon: mdi:magnify
+  mode: single
+  fields:
+    phrase:
+      description: The phrase from the list to search for
+      example: chicken wings
+      required: true
+  sequence:
+    - condition: template
+      value_template: "{{ phrase | default('') | trim != '' }}"
+    - event: walmart_search_phrase
+      event_data:
+        phrase: "{{ phrase }}"

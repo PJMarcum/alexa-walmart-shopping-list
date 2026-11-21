@@ -1,0 +1,30 @@
+# ha/panel_custom.yaml
+#
+# THIS FILE IS A SNIPPET TO PASTE, NOT LIVE CONFIG.
+#
+# Home Assistant includes automations.yaml, scripts.yaml and scenes.yaml. It
+# does NOT include this. The real panel_custom block lives inline in
+# configuration.yaml, and that is the only copy Home Assistant reads.
+#
+# Editing this file changes nothing on the tablet. Editing it, copying it to
+# /homeassistant/panel_custom.yaml, checking the md5 matched and concluding
+# the deploy was live cost an afternoon: the tablet sat on v4 while two
+# versions were "deployed" and two restarts were spent on it.
+#
+# tools/deploy_panel.sh now edits configuration.yaml itself. Use it.
+# Goes in configuration.yaml. The panel is a JavaScript module in
+# /config/www/kitchen/, which is served without authentication; that is
+# fine because it contains no credential. Home Assistant injects an
+# authenticated `hass` object into the element.
+panel_custom:
+  - name: walmart-kitchen-panel
+    sidebar_title: Kitchen
+    sidebar_icon: mdi:silverware-fork-knife
+    url_path: kitchen
+    # The version in the path is deliberate. Home Assistant serves /local/
+    # with a 31 day cache and no revalidation, and panel.js imports its
+    # siblings with relative specifiers, so only a new DIRECTORY busts the
+    # whole module graph. tools/deploy_panel.sh explains it in full.
+    module_url: /local/kitchen/v6/panel.js
+    embed_iframe: false
+    require_admin: false

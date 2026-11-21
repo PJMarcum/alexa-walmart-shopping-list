@@ -1,0 +1,99 @@
+# Warm, light theme for the kitchen tablet.
+#
+# Applied per-dashboard, not globally: the Kitchen dashboard sets this in its
+# YAML, so your other dashboards keep whatever theme they use today.
+#
+# The palette is a warm one: a warm sand
+# page, cream cards that sit just light of it, near-black warm text, and two
+# muted accents (sage and clay) rather than a saturated primary. Nothing here
+# is a pure grey, which is what makes it read as warm rather than clinical.
+kitchen_cream:
+  # --- page and surfaces -------------------------------------------------
+  primary-background-color: "#EFE9DD"      # warm sand, the page itself
+  secondary-background-color: "#E7E0D2"    # slightly deeper, for wells
+  card-background-color: "#FAF6EE"         # cream, sits just above the page
+  ha-card-background: "#FAF6EE"
+  divider-color: "#E0D8C8"
+  table-row-background-color: "#FAF6EE"
+  table-row-alternative-background-color: "#F4EFE4"
+
+  # --- type --------------------------------------------------------------
+  primary-text-color: "#2C2A26"            # warm near-black, not #000
+  secondary-text-color: "#7A7366"          # muted clay-grey for subtitles
+  text-primary-color: "#2C2A26"
+  disabled-text-color: "#B3AB9C"
+
+  # --- accents -----------------------------------------------------------
+  # Sage carries interactive state; clay is the warm highlight. Both are
+  # desaturated so a wall of cards does not shout.
+  primary-color: "#5B7A6A"                 # sage green
+  accent-color: "#B07D56"                  # clay
+  state-icon-color: "#5B7A6A"
+  state-icon-active-color: "#B07D56"
+  paper-item-icon-color: "#8A8273"
+  paper-item-icon-active-color: "#B07D56"
+  label-badge-background-color: "#FAF6EE"
+  label-badge-text-color: "#2C2A26"
+
+  # --- card shape --------------------------------------------------------
+  # Generous radius and a soft, warm-tinted shadow rather than a grey one.
+  # A grey shadow over a sand background is what makes cheap light themes
+  # look muddy.
+  ha-card-border-radius: "18px"
+  ha-card-border-width: "0px"
+  ha-card-box-shadow: "0 1px 2px rgba(74, 61, 40, 0.05), 0 4px 16px rgba(74, 61, 40, 0.06)"
+
+  # --- header and sidebar ------------------------------------------------
+  app-header-background-color: "#EFE9DD"
+  app-header-text-color: "#2C2A26"
+  app-header-edit-background-color: "#E7E0D2"
+  sidebar-background-color: "#F4EFE4"
+  sidebar-text-color: "#2C2A26"
+  sidebar-selected-text-color: "#5B7A6A"
+  sidebar-selected-icon-color: "#5B7A6A"
+  sidebar-icon-color: "#8A8273"
+
+  # --- controls ----------------------------------------------------------
+  switch-checked-color: "#5B7A6A"
+  switch-unchecked-button-color: "#FAF6EE"
+  switch-unchecked-track-color: "#D8D0BF"
+  paper-toggle-button-checked-bar-color: "#5B7A6A"
+  mdc-theme-primary: "#5B7A6A"
+  mdc-theme-on-primary: "#FAF6EE"
+  input-fill-color: "#F4EFE4"
+  input-ink-color: "#2C2A26"
+  input-label-ink-color: "#7A7366"
+  input-idle-line-color: "#D8D0BF"
+  # The todo card's "Add item" box is a Material text field, and it does NOT
+  # read the input-* variables above. Without these it keeps Home Assistant's
+  # dark default fill, which on a light theme renders near-black text on a
+  # near-black box. Observed on the kitchen dashboard.
+  mdc-text-field-fill-color: "#F4EFE4"
+  mdc-text-field-ink-color: "#2C2A26"
+  mdc-text-field-label-ink-color: "#7A7366"
+  mdc-text-field-idle-line-color: "#D8D0BF"
+  mdc-text-field-hover-line-color: "#B9AE97"
+  mdc-text-field-disabled-fill-color: "#EFE9DD"
+  mdc-text-field-disabled-ink-color: "#B3AB9C"
+  mdc-select-fill-color: "#F4EFE4"
+  mdc-select-ink-color: "#2C2A26"
+  mdc-select-label-ink-color: "#7A7366"
+  mdc-dialog-content-ink-color: "#2C2A26"
+  mdc-dialog-heading-ink-color: "#2C2A26"
+
+  # Home Assistant 2026.4 replaced ha-textfield with ha-input, which reads
+  # these semantic variables instead of the mdc-text-field-* ones above. On
+  # 2026.9 the mdc names are simply ignored, which is why the todo card's
+  # "Add item" box and the input_text field kept rendering dark text on a
+  # dark fill under a light theme. The mdc names are kept for any component
+  # that has not been migrated yet.
+  ha-color-form-background: "#F4EFE4"
+  ha-color-form-background-hover: "#EFE9DD"
+  ha-color-form-background-disabled: "#EFE9DD"
+
+  # --- status ------------------------------------------------------------
+  # Muted to match the palette; a default HA red on cream is jarring.
+  success-color: "#5B7A6A"
+  warning-color: "#C08A3E"
+  error-color: "#A65A4A"
+  info-color: "#6B7F91"

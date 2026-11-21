@@ -1,0 +1,27 @@
+# Your own catalog. It's your household's shopping history; keep it local.
+walmart_catalog.json
+/catalog.json
+!tests/fixtures/*.json
+
+# Secrets
+secrets.yaml
+*.env
+.env*
+*token*
+!tests/**
+
+# Generated
+ha/www/walmart/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+runs/
+*.log
+tests/fixtures/catalog_corrupt.json
+tests/fixtures/catalog_partial.json
+
+# OS cruft
+desktop.ini
+Thumbs.db
+.DS_Store

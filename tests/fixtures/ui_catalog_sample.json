@@ -1,0 +1,60 @@
+{
+  "count": 6,
+  "items": [
+    {
+      "id": 900001,
+      "name": "Paper Towels, 6 Double Rolls",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900001.jpeg",
+      "phrases": [
+        "paper towel"
+      ],
+      "bought": 1
+    },
+    {
+      "id": 900002,
+      "name": "Sour Cream, 16 oz",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900002.jpeg",
+      "phrases": [
+        "sour cream"
+      ],
+      "bought": 1
+    },
+    {
+      "id": 900003,
+      "name": "Fluoride Toothpaste, 4.8 oz",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900003.jpeg",
+      "phrases": [
+        "dad toothpaste"
+      ],
+      "bought": 1
+    },
+    {
+      "id": 900004,
+      "name": "2% Reduced Fat Milk, Gallon",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900004.jpeg",
+      "phrases": [
+        "milk"
+      ],
+      "bought": 1
+    },
+    {
+      "id": 900005,
+      "name": "Tall Kitchen Trash Bags, 13 Gallon, 80 Count",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900005.jpeg",
+      "phrases": [
+        "trash bag"
+      ],
+      "bought": 1
+    },
+    {
+      "id": 900006,
+      "name": "Cola Soda, 12 fl oz, 12 Pack Cans",
+      "thumb": "https://i5.walmartimages.com/seo/sample-900006.jpeg",
+      "phrases": [
+        "cola"
+      ],
+      "bought": 1
+    }
+  ],
+  "skip_phrases": []
+}

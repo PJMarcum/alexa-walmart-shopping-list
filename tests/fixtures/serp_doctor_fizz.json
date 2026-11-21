@@ -1,0 +1,21 @@
+{
+  "search_information": { "total_results": 322 },
+  "organic_results": [
+    {
+      "title": "Dr Fizz Soda Pop, 12 fl oz, 12 Pack Cans",
+      "us_item_id": "80000004",
+      "product_id": "6XS02JTJK8P2",
+      "product_page_url": "https://www.walmart.com/ip/80000004",
+      "primary_offer": { "offer_price": 6.97 },
+      "out_of_stock": false
+    },
+    {
+      "title": "Dr Fizz Soda Pop, 16.9 fl oz, 6 Pack Bottles",
+      "us_item_id": "80000010",
+      "product_id": "3SX83CSPIV4D",
+      "product_page_url": "https://www.walmart.com/ip/80000010",
+      "primary_offer": { "offer_price": 4.84 },
+      "out_of_stock": false
+    }
+  ]
+}

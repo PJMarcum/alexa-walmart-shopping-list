@@ -1,0 +1,11 @@
+- alias: Walmart cart, Friday morning
+  id: walmart_cart_friday
+  triggers:
+    - trigger: time
+      at: "07:00:00"
+  conditions:
+    - condition: time
+      weekday:
+        - fri
+  actions:
+    - action: script.build_walmart_cart_quiet

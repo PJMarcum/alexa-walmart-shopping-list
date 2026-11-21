@@ -1,0 +1,5 @@
+input_text:
+  walmart_pick:
+    name: Walmart pick
+    max: 60
+    icon: mdi:cursor-default-click

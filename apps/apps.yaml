@@ -1,0 +1,51 @@
+walmart_cart:
+  module: walmart_cart_app
+  class: WalmartCart
+  catalog_path: /config/appdaemon/walmart/catalog.json
+  run_dir: /config/appdaemon/walmart/runs
+  store_id: "1234"   # your Walmart store number
+  serpapi_key: !secret serpapi_key
+  # Both phones. Each is attempted independently, so one being unreachable
+  # does not cost the other the notification.
+  notify_targets:
+    - notify/mobile_app_your_phone
+    - notify/mobile_app_second_phone
+  # Echoes that announce the cart is ready. The announcement carries no link,
+  # so its job is only to send someone to their phone. Remove entries or leave
+  # the list empty to disable.
+  announce_targets:
+    - notify.kitchen_echo_announce
+    - notify.den_echo_announce
+  # Optional SMS. Its own channel, not a notify_target, because an SMS
+  # notify platform takes recipients as 'target' at call time and needs the
+  # cart URL inside the message body. Goes through script.walmart_send_sms
+  # (ha/scripts.yaml), which you point at your own SMS notify service.
+  # Leave sms_recipients empty to disable.
+  sms_service: script/walmart_send_sms
+  sms_recipients: []
+    # - "+15555550100"
+    # - "+15555550101"
+  reload_anchor_entity: todo.you_example_com_grocery
+  ui_data_path: /config/www/walmart/catalog.json
+  # Start the board with only the hand-mapped products. Set to false to show
+  # the whole scraped index.
+  ui_aliased_only: true
+
+# The panel's other helpers. Each is its own app so a failure in one cannot
+# stop the cart from building.
+kitchen_state:
+  module: kitchen_state_app
+  class: KitchenState
+
+mealie_parse:
+  module: mealie_parse_app
+  class: MealieParse
+  # From inside AppDaemon the Mealie add-on is reachable by its add-on
+  # hostname. Use your LAN address if Mealie runs somewhere else.
+  mealie_url: http://a0d7b954-mealie:9000
+  mealie_token: !secret mealie_token
+
+# Optional. Rotates a Mealie recipe photo into Fully Kiosk's screensaver.
+food_screensaver:
+  module: food_screensaver_app
+  class: FoodScreensaver
